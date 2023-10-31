@@ -18,7 +18,7 @@ Memungkinkan seorang profesional/dokter bekerja lebih cepat dan tepat, dengan it
 - Memudahkan dokter/ahli profesional dalam menentukan pengobatan selanjutnya bagi pasien yang mengidap/tidak mengidap penyakit diabetes dengan hasil yang dikeluarkan oleh Web App.
 
 ## Data Understanding
-Diabetes dataset adalah datasets yang saya gunakan, saya dapatkan dari kaggle.com. Data-data yang terdapat di dalam datasets ini didapatkan dari data medikal pasien (tentunya dikumpulkan dengan izin mereka) alias data riil. Datasets ini mengandung 9 Attribut(Kolom) dan 768 data(baris) pada saat sebelum pemrosesan data cleasing dan EDA.
+Diabetes dataset adalah datasets yang saya gunakan, saya dapatkan dari kaggle.com. Data-data ini dapat digunakan untuk melakukan prediksi/diagnosa terhadap pasien yang bisa saja memiliki penyakit diabetes. Datasets ini mengandung 9 Attribut(Kolom) dan 768 data(baris) pada saat sebelum pemrosesan data cleasing dan EDA.
 <br> 
 
 [Diabetes dataset](https://www.kaggle.com/datasets/mahdiehhajian/diabetes).
