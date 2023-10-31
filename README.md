@@ -32,10 +32,10 @@ Diabetes dataset adalah datasets yang saya gunakan, saya dapatkan dari kaggle.co
 - BMI     : merupakan pengukuran lemak tubuh berdasarkan berat dan tinggi badan.
 - DiabetesPedigreeFunction  : fungsi yang menghasilkan nilai pengaruh riwayat penyakit diabetes pada seseorang.
 - Age : merupakan umur pasien.
-- Outcome  : menunjukkan apakah pasien mengidap diabetes atau tidak. [1: True, 0: False]
+- Outcome  : menunjukkan apakah pasien mengidap diabetes atau tidak.
 
 ## Data Preparation
-Untuk data preparation ini saya melakukan EDA (Exploratory Data Analysis) terlebih dahulu, lalu melakukan proses data balancing agar model yang dihasilkan memiliki score yang lebih tinggi.
+Untuk data preparation ini saya melakukan EDA (Exploratory Data Analysis) terlebih dahulu, lalu melakukan proses data cleansing agar model yang dihasilkan memiliki score yang lebih tinggi.
 
 Sebelum memulai data preparation, kita akan mendownload datasets dari kaggle yang akan kita gunakan, langkah pertama adalah memasukkan token kaggle,
 ``` bash
