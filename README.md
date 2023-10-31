@@ -18,24 +18,24 @@ Memungkinkan seorang profesional/dokter bekerja lebih cepat dan tepat, dengan it
 - Memudahkan dokter/ahli profesional dalam menentukan pengobatan selanjutnya bagi pasien yang mengidap/tidak mengidap penyakit diabetes dengan hasil yang dikeluarkan oleh Web App.
 
 ## Data Understanding
-Diabetes prediction dataset adalah datasets yang saya gunakan, saya dapatkan dari kaggle.com. Data-data yang terdapat di dalam datasets ini didapatkan dari data medikal pasien (tentunya dikumpulkan dengan izin mereka) alias data riil. Datasets ini mengandung 9 Attribut(Kolom) dan 100,000 data(baris) pada saat sebelum pemrosesan data cleasing dan EDA.
+Diabetes dataset adalah datasets yang saya gunakan, saya dapatkan dari kaggle.com. Data-data yang terdapat di dalam datasets ini didapatkan dari data medikal pasien (tentunya dikumpulkan dengan izin mereka) alias data riil. Datasets ini mengandung 9 Attribut(Kolom) dan 768 data(baris) pada saat sebelum pemrosesan data cleasing dan EDA.
 <br> 
 
-[Diabetes prediction dataset](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset).
+[Diabetes dataset](https://www.kaggle.com/datasets/mahdiehhajian/diabetes).
 
-### Variabel-variabel pada Diabetes prediction dataset adalah sebagai berikut:
-- gender : merupakan jenis kelamin pasien. [Female, Male]
-- age    : merupakan umut pasien. [Numbers, min: 0, max: 80]
-- hypertension : merupakan kondisi medis yang dialami oleh pasien dimana tekanan darah semakin meningkat. [1: True, 0: False]
-- heart_disease: merupakan kondisi medis yang dialami oleh pasien dimana mereka memiliki penyakit jantung. [1: True, 0: False]
-- smoking_history : menunjukkan mengenai riwayat merokok pasien. [No info, never, former, current, not current]
-- bmi     : merupakan pengukuran lemak tubuh berdasarkan berat dan tinggi badan [Float, min: 10, max: 95.7]
-- HbA1c_level  : merupakan pengukuran rata-rata level gula pada darah dari 2-3 bulan yang lalu.[Float, min: 3.5, max: 9]
-- blood_glucose_level : merupakan pengukuran rata-rata level gula pada darah dari 1-3 hari yang lalu.[Numbers, min: 80, max: 300]
-- diabetes  : menunjukkan apakah pasien mengidap diabetes atau tidak. [1: True, 0: False]
+### Variabel-variabel pada Diabetes dataset adalah sebagai berikut:
+- Pregnancies : merupakan jumlah angka pasien hamil.
+- Glucose    : merupakan level glucose pasien.
+- BloodPressure : merupakan level tekanan darah pasien pada saat diperiksa.
+- SkinThickness : merupakan ketebalan kulit pasien dalam satuan mm.
+- Insulin : menunjukkan tingkat insulin pada tubuh pasien.
+- BMI     : merupakan pengukuran lemak tubuh berdasarkan berat dan tinggi badan.
+- DiabetesPedigreeFunction  : fungsi yang menghasilkan nilai pengaruh riwayat penyakit diabetes pada seseorang.
+- Age : merupakan umur pasien.
+- Outcome  : menunjukkan apakah pasien mengidap diabetes atau tidak. [1: True, 0: False]
 
 ## Data Preparation
-Untuk data preparation ini saya melakukan EDA (Exploratory Data Analysis) terlebih dahulu, lalu melakukan proses data cleansing agar model yang dihasilkan memiliki score yang lebih tinggi.
+Untuk data preparation ini saya melakukan EDA (Exploratory Data Analysis) terlebih dahulu, lalu melakukan proses data balancing agar model yang dihasilkan memiliki score yang lebih tinggi.
 
 Sebelum memulai data preparation, kita akan mendownload datasets dari kaggle yang akan kita gunakan, langkah pertama adalah memasukkan token kaggle,
 ``` bash
@@ -51,11 +51,11 @@ Lalu kita harus membuat folder untuk menampung file kaggle yang tadi telah diupl
 ```
 Lalu, download datasets menggunakan code dibawah ini, 
 ``` bash
-!kaggle datasets download -d iammustafatz/diabetes-prediction-dataset
+!kaggle datasets download -d mahdiehhajian/diabetes
 ```
 Setelah download telah selesai, langkah selanjutnya adalah mengektrak file zipnya kedalam sebuah folder,
 ``` bash
-!unzip diabetes-prediction-dataset.zip -d diabetes_prediction
+!unzip diabetes.zip -d diabetes_prediction
 !ls diabetes_prediction
 ```
 Datasets telah diekstrak, seharusnya sekarang ada folder yang bernama diabetes_prediction dan di dalamnya terdapat file dengan ektensi .csv, <br>
@@ -66,10 +66,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 ```
-Selanjutnya, mari baca file .csv yang tadi kita ekstrak, lalu melihat 5 data pertama yang ada pada datasets,
+Selanjutnya, mari baca file .csv yang tadi kita ekstrak, lalu melihat 3 data pertama yang ada pada datasets,
 ``` bash
-data = pd.read_csv("diabetes_prediction/diabetes_prediction_dataset.csv")
-data.head()
+data = pd.read_csv("diabetes_prediction/diabetes.csv")
+data.head(3)
 ```
 Lalu untuk melihat jumah data, mean data, data terkecil dan data terbesar bisa dengan kode ini,
 ``` bash
@@ -84,56 +84,84 @@ Selanjutnya kita akan melihat korelasi antar kolomnya,
 plt.figure(figsize=(10,8))
 sns.heatmap(data.corr(), annot=True)
 ```
-![download](https://github.com/RexBaee/prediksi_diabetes/assets/130348460/a273a2b8-7c60-4732-9a96-5d6ae30167de)
+![download](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/df4a6f8f-6791-44ba-aef8-a53cc7677771)
 <br>
-Korelasi antar kolom numerik terlihat aman namun saya merasa terlalu banyak data yang tidak berkaitan erat, selanjutnya melihat apakah di dalam datasetsnya terdapat nilai null,
+Korelasi antar kolom terlihat aman dan banyak kolom memiliki kaitan yang erat satu dengan yang lainnya.
+selanjutnya kita akan lihat nilai dari masing masing kolom dan melihat apakah ada yang aneh/abnormal,
 ``` bash
-sns.heatmap(data.isnull())
-```
-![download](https://github.com/RexBaee/prediksi_diabetes/assets/130348460/0669c8e2-47d4-4f79-9992-fb90ee407ad5) <br>
-Semuanya merah yang menandakan bahwa datasetsnya tidak memiliki data null di dalamnya, selanjutnya akan melihat apakah ada data duplikasi,
-``` bash
-data[data.duplicated()]
-```
-Terdapat keterangan bahwa 3854 baris merupakan data duplikasi, untuk menghapus data duplikasinya bisa menggunakan kode berikut,
-``` bash
-data.drop_duplicates(inplace=True)
-```
-selanjutnya kita bisa periksa jumlah data yang tersisa dengan kode berikut,
-``` bash
-data.info()
-```
-96146 baris data yang akan digunakan untuk diproses menjadi model nantinya. Selanjutnya memisahkan data-data unique menjadi integer, seperti berikut, <br>
-Pertama harus mencari terlebih dahulu data unique yang bertype string(object),
-``` bash
-pd.unique(data.smoking_history)
-pd.unique(data.gender)
-```
-Selanjutnya membuat fungsi untuk menjadikan masing-masing string menjadi sebuah integer,
-``` bash
-def change_string_to_int(column):
-    variables=pd.unique(data[column])
-    for item in range(variables.size):
-        data[column]=[item if each==variables[item] else each for each in data[column]]
-    return data[column]
-```
-Lalu mengimplementasikan fungsi yang tadi sudah dibuat dan memasukkan hasilnya pada kolom yang sesuai, 
-``` bash
-data["gender"]=change_string_to_int("gender")
-data["smoking_history"]=change_string_to_int("smoking_history")
-```
-Langkah selanjutnya adalah melihat korelasi antara semua kolom,
-``` bash
-f,ax = plt.subplots(figsize=(10, 10))
-sns.heatmap(data.corr(numeric_only=True), annot=True, linewidths=.5, fmt= '.1f',ax=ax,)
+plt.figure(figsize=(15,25))
+for i in range(len(df.columns)):
+    plt.subplot(521+i)
+    sns.histplot(df.iloc[:,i])
 plt.show()
 ```
-![download](https://github.com/RexBaee/prediksi_diabetes/assets/130348460/bcdfb4d3-bce8-4aa9-a376-a1b11aed2f8b)
-Bisa dilihat bahwa korelasi kolom gender dengan kolom yang lainnya sangatlah rendah, ini bisa mempengaruhi model kita, maka sebaiknya untuk dihilangkan saja,
+![download](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/671e6038-3c5a-4665-8e25-a3a89a2dc757)
+Seharusnya tidak mungkin BMI atau Blood Pressure untuk menjadi 0, kemungkinan terdapat sesuatu abnormal seperti peningkatan secara drastis, kita akan masukkan data median saya untuk mengisinya,
 ``` bash
-data.drop("gender",axis=1,inplace=True)
+median_BloodPressure = df['BloodPressure'].median()
+df['BloodPressure'] = df['BloodPressure'].replace(0, median_BloodPressure)
+
+median_BMI = df['BMI'].median()
+df['BMI'] = df['BMI'].replace(0, median_BMI)
 ```
-Dan proses EDA dan data cleaning sudah diselesaikan. Selanjutnya adalah membuat modelnya.
+Saya juga tidak yakin apakah jika glucose, skin thickness dan insulin berangka 0, ianya akan menimbulkan masalah, kita akan coba selesaikan masalahnya,
+``` bash
+tmp_df = df.copy()
+```
+``` bash
+TARGET = "Outcome"
+plt.figure(figsize=(12,8))
+plt.subplot(221)
+sns.boxplot(x=df[TARGET],y=df["Glucose"])
+
+
+plt.subplot(222)
+sns.boxplot(x=df[TARGET],y=df["SkinThickness"])
+
+plt.subplot(223)
+sns.boxplot(x=df[TARGET],y=df["Insulin"])
+plt.show()
+```
+![download](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/6d8c18b1-4c52-4ad7-be89-cd912ae0d3b6) <br>
+``` bash
+median_Glucose = tmp_df['Glucose'].median()
+median_SkinThickness = tmp_df['SkinThickness'].median()
+median_Insulin = tmp_df['Insulin'].median()
+tmp_df['Glucose'] = tmp_df['Glucose'].replace(0, median_Glucose)
+tmp_df['SkinThickness'] = tmp_df['SkinThickness'].replace(0, median_SkinThickness)
+tmp_df['Insulin'] = tmp_df['Insulin'].replace(0, median_Insulin)
+
+plt.figure(figsize=(12,8))
+plt.subplot(221)
+sns.boxplot(x=tmp_df[TARGET],y=tmp_df["Glucose"])
+
+plt.subplot(222)
+sns.boxplot(x=tmp_df[TARGET],y=tmp_df["SkinThickness"])
+
+plt.subplot(223)
+sns.boxplot(x=tmp_df[TARGET],y=tmp_df["Insulin"])
+plt.show()
+```
+![download](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/b309f145-9aeb-4a49-91ea-f5f173aca883)
+Dari plot diatas, kurang terlihat ya perbedaannya tapi ada perbedaannya, mari gunakan korelasi data saja untuk melihatnya lebih jelas,
+``` bash
+plt.figure(figsize=(8, 6))
+sns.heatmap(df.corr(), annot=True, fmt=".2f")
+plt.show()
+```
+![download](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/90a82493-7d33-409d-8f8c-c5579e5a9530) <br>
+``` bash
+plt.figure(figsize=(8, 6))
+sns.heatmap(tmp_df.corr(), annot=True, fmt=".2f")
+plt.show()
+```
+![download](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/886aa722-2a30-48dd-8ace-9b135abe3ede)
+Disini kita bisa melihat data hasil prosesan kita (tmp_df) lebih tinggi korelasinya dibandingkan data biasanya (df), maka kita akan gunakan tmp_df,
+```
+x = tmp_df.drop("Outcome",axis=1)
+y = tmp_df.Outcome
+```
+Pemisahan fitur dan target sudah dilakukan, mari lanjut dengan tahap modeling.
 
 ## Modeling
 Model machine learning yang akan digunakan disini adalah logistic regression, langkah pertama yang harus kita lakukan adalah memasukkan semua library yang akan digunakan pada saat proses pembuatan model,
@@ -141,11 +169,6 @@ Model machine learning yang akan digunakan disini adalah logistic regression, la
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.metrics import r2_score,confusion_matrix
-```
-Lalu membuat variable yang akan menampung fitur-fitur dan targetnya,
-```
-x = data.drop("diabetes", axis=1)
-y = data.diabetes
 ```
 Langkah selanjutnya adalah membuat train test split, dengan persentase 30% test dan 70% train
 ``` bash
@@ -162,9 +185,9 @@ logreg = linear_model.LogisticRegression(random_state = 42,max_iter= 200,)
 print("test accuracy: {} ".format(logreg.fit(x_train, y_train).score(x_test, y_test)))
 print("train accuracy: {} ".format(logreg.fit(x_train, y_train).score(x_train, y_train)))
 ```
-Score yang kita dapatkan adalah 95.85% untuk test dan 95.89% untuk train, lalu akhirnya kita akan uji dengan data inputan kita sendiri,
+Score yang kita dapatkan adalah 74.45% untuk test dan 78.77% untuk train, lalu akhirnya kita akan uji dengan data inputan kita sendiri,
 ``` bash
-data = np.array([[80, 0, 1, 0, 25.19, 6.6, 140]])
+data = np.array([[3, 100, 80, 26, 115, 31.6, 0.503, 20]])
 print(logreg.predict(data))
 ```
 Dan hasilnya adalah 0 yang artinya tidak berpotensi mengidap diabetes. Sebelum mengakhiri ini, kita harus ekspor modelnya menggunakan pickle agar nanti bisa digunakan pada media lain.
@@ -186,10 +209,13 @@ ax.set_xlabel('Predicted labels');ax.set_ylabel('True labels');
 ax.set_title('Confusion Matrix');
 ax.xaxis.set_ticklabels(['diabetes','not_diabetes']); ax.yaxis.set_ticklabels(['diabetes','not_diabetes']);
 ```
-![download](https://github.com/RexBaee/prediksi_diabetes/assets/130348460/852cf0cc-7bb1-468a-8514-23bb03eccb80) <br>
-Disitu terlihat jelas bahwa model kita berhasil memprediksi nilai diabetes yang sama dengan nilai aktualnya sebanyak 26017 data.
+![download](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/9dad49b4-8dbe-425b-9ede-3fa88832cfb3)
+<br>
+Disitu terlihat jelas bahwa model kita berhasil memprediksi nilai diabetes yang sama dengan nilai aktualnya sebanyak 123 data.
 
 ## Deployment
-[Diabetes Prediction App](https://prediksidiabetes-reki.streamlit.app/)
+[Diabetes Prediction App Reki](https://diabetesprediction2-reki.streamlit.app/)
+![image](https://github.com/RexBaee/diabetes_prediction_2/assets/130348460/b95a65e6-4f9e-4298-be18-a9a9b4781304)
 
-![image](https://github.com/RexBaee/prediksi_diabetes/assets/130348460/e9be203b-a687-4488-82cf-63846da7f3df)
+
+
